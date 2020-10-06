@@ -1,5 +1,5 @@
 <template>
-  <div :id="el" class="gojs-component" :class="divClassName"></div>
+  <div :id="el" class="gojs-diagram" :class="divClassName"></div>
 </template>
 
 <script>
@@ -7,7 +7,7 @@ import * as go from 'gojs'
 import { onBeforeUnmount, onMounted, ref, watch, nextTick } from 'vue'
 
 export default {
-  name: 'GojsElement',
+  name: 'GojsDiagram',
   props: {
     el: {
       type: String,
@@ -46,7 +46,7 @@ export default {
       diagram.div = props.el
       diagram.delayInitialization(() => {
         const model = diagram.model
-        model.commit(m => {
+        model.commit((m) => {
           m.mergeNodeDataArray(m.cloneDeep(props.nodeDataArray))
           if (
             !!props.linkDataArray &&
@@ -59,7 +59,7 @@ export default {
           }
         }, null)
 
-        modelChangedListener.value = e => {
+        modelChangedListener.value = (e) => {
           if (e.isTransactionFinished) {
             const dataChanges = e.model.toIncrementalData(e)
             if (dataChanges !== null) {
@@ -83,17 +83,12 @@ export default {
     )
 
     watch(
-      () => props.nodeDataArray,
-      () => {
-        _updateDiagram()
-      }
-    )
-
-    watch(
       () => props.linkDataArray,
+      props.nodeDataArray,
       () => {
         _updateDiagram()
-      }
+      },
+      { deep: true }
     )
 
     function _updateDiagram() {
@@ -147,9 +142,9 @@ export default {
 </script>
 
 <style>
-.gojs-component {
-  position: relative;
-  width: 100vw;
+.gojs-diagram {
   height: 100vh;
+  position: relative;
+  width: calc(100vw - 10rem);
 }
 </style>

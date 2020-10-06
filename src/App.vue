@@ -1,84 +1,38 @@
 <template>
-  <gojs-element
+  <gojs-palette el="gojs_palette"> </gojs-palette>
+  <gojs-diagram
     el="gojs"
     :nodeDataArray="nodeDataArray"
     :modelData="modelData"
-    :initDiagram="init"
-  ></gojs-element>
+    :linkDataArray="linksArray"
+    :initDiagram="initDiagram"
+  ></gojs-diagram>
 </template>
 
 <script>
 import { ref } from 'vue'
-import GojsElement from './components/GojsElement'
-import * as go from 'gojs'
+import GojsDiagram from '@/components/GojsDiagram'
+import GojsPalette from '@/components/GojsPalette'
+import diagram from '@/services/diagram'
+import useDiagram from '@/hooks/useDiagram'
 
 export default {
   name: 'App',
   components: {
-    GojsElement
+    GojsDiagram,
+    GojsPalette
   },
   setup() {
-    const nodeDataArray = ref([
-      { key: 'Alpha', color: 'lightblue' },
-      { key: 'Beta', color: 'orange' },
-      { key: 'Gamma', color: 'lightgreen' },
-      { key: 'Delta', color: 'pink' }
-    ])
-
-    const modelData = ref({
-      canRelink: true
-    })
-
-    function init() {
-      const $ = go.GraphObject.make
-      const diagram = $(go.Diagram, {
-        'undoManager.isEnabled': true,
-        model: $(go.GraphLinksModel, {
-          linkKeyProperty: 'key'
-        })
-      })
-      diagram.nodeTemplate = $(
-        go.Node,
-        'Auto',
-        $(
-          go.Shape,
-          'RoundedRectangle',
-          {
-            strokeWidth: 0,
-            fill: 'white',
-            portId: '',
-            fromLinkable: true,
-            toLinkable: true,
-            cursor: 'pointer'
-          },
-          new go.Binding('fill', 'color')
-        ),
-        $(
-          go.TextBlock,
-          {
-            margin: 8,
-            font: 'bold 14px sans-serif',
-            stroke: '#333'
-          },
-          new go.Binding('text', 'key')
-        )
-      )
-
-      diagram.linkTemplate = $(
-        go.Link,
-        new go.Binding('relinkableFrom', 'canRelink').ofModel(),
-        new go.Binding('relinkableTo', 'canRelink').ofModel(),
-        $(go.Shape),
-        $(go.Shape, { toArrow: 'Standard' })
-      )
-
-      return diagram
-    }
+    const nodeDataArray = ref(diagram.nodeArrayModel)
+    const linksArray = ref(diagram.linksNodeArray)
+    const modelData = ref(diagram.dataModel)
+    const { initDiagram } = useDiagram()
 
     return {
-      init,
       nodeDataArray,
-      modelData
+      linksArray,
+      modelData,
+      initDiagram
     }
   }
 }
@@ -86,11 +40,11 @@ export default {
 
 <style>
 #app {
+  display: flex;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
 }
 </style>
